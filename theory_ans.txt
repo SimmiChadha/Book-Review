@@ -1,0 +1,88 @@
+Question 1: Explain how FastAPI handles asynchronous requests and its benefits over synchronous 
+code in Python.
+ans - FastAPI handles asynchronous requests using Python's async and await syntax along with the 
+asynchronous capabilities provided by ASGI (Asynchronous Server Gateway Interface).
+Async Functions- FastAPI allows you to define asynchronous request handlers using async functions. 
+These functions use the async def syntax and can contain await expressions to await asynchronous 
+operations.
+Async Database Operations- FastAPI integrates seamlessly with asynchronous database libraries like 
+SQLAlchemy async. This allows you to perform database operations asynchronously, improving the overall 
+performance of your application.
+
+Benefits of Asynchronous Code in FastAPI
+- Asynchronous code in FastAPI can handle multiple concurrent requests efficiently.
+- Asynchronous code allows your FastAPI application to handle a higher number of concurrent connections 
+without significant performance degradation. This scalability is crucial for applications that need to 
+serve many clients simultaneously.
+- Asynchronous code can utilize system resources more effectively by avoiding unnecessary waiting periods.
+- Asynchronous code in FastAPI achieves concurrency without using multiple threads. This results in 
+reduced overhead and complexity associated with thread management, making it easier to write and maintain 
+asynchronous code.
+
+
+Question 2: Describe how dependency injection works in FastAPI and give an example of its practical use.
+ans- Dependency injection in FastAPI refers to the process of automatically providing dependencies 
+(such as database connections, external services, configuration settings, etc.) to your endpoint functions 
+or other components of your application. 
+
+Dependencies are declared using FastAPI's dependency injection system. You can declare dependencies 
+as parameters in your endpoint functions or as dependencies for other functions or classes.
+
+When an endpoint is called, FastAPI automatically resolves the declared dependencies and provides the 
+necessary instances or values to the function.
+
+Practical Example of Dependency Injection in FastAPI:
+We have a FastAPI application that connects to a database and needs a database session for handling 
+database operations.
+
+we define the database session as a dependency in our application.
+from fastapi import Depends, FastAPI
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+# SQLAlchemy configuration
+SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+# Dependency to provide database session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+app = FastAPI()
+
+
+# Endpoint using the database session dependency
+@app.get("/items/")
+def read_items(db: Session = Depends(get_db)):
+    # Use the database session (db) to perform database operations
+    # For example:
+    # items = db.query(Item).all()
+    # return items
+    return {"message": "Items retrieved successfully"}
+
+get_db() is a dependency function that provides a database session (Session) using SQLAlchemy's 
+sessionmaker.
+
+
+Question 3: Code walkthrough
+
+Walk through the code for the book review system using FastAPI.
+
+database.py - This file sets up the SQLAlchemy database engine and creates a sessionmaker.
+
+models.py - Defines SQLAlchemy models for Book and Review with a one-to-many relationship between them.
+
+schemas.py - Defines Pydantic schemas for Book and Review to handle input validation and 
+serialization/deserialization.
+
+main.py - Sets up FastAPI, imports necessary modules, creates the database tables, and defines endpoints 
+for CRUD operations on books and reviews using dependency injection for database sessions.
+
+
+
